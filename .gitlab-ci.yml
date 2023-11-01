@@ -1,53 +1,50 @@
-image: amazoncorretto:17-al2-full
+image: docker:24.0.7
 
 default:
   tags:
     - docker_executor
+#    - shell_executor
   services:
-    - docker:dind
+   - name: docker:24.0.7-dind
 
 variables:
-  KUBECTL_VERSION: "1.28.3" #$(curl -L -s https://dl.k8s.io/release/stable.txt)
+  #$(wget -qO - https://dl.k8s.io/release/stable.txt)
+  KUBECTL_VERSION: "v1.28.3"
   KIND_VERSION: "v0.20.0"
   CLUSTER_NAME: "my-test-cluster"
 
 stages:
-  - install_kind
-  - create_k8s_cluster
-  - install_kubectl
-  - run_tests
+  - setup_and_run_tests
   - save_results
 
-install_kind:
-  stage: install_kind
-  script:
-    - curl -Lo ./kind https://kind.sigs.k8s.io/dl/$KIND_VERSION/kind-linux-amd64
-    - chmod +x ./kind
-    - mv ./kind /usr/local/bin/
-    - kind version
-#  variables:
-#    PATH: /usr/local/bin:$PATH
+before_script:
+  - echo "Installing kind"
+  - wget -qO kind "https://kind.sigs.k8s.io/dl/$KIND_VERSION/kind-linux-amd64"
+  - chmod +x kind
+  - mv kind /usr/local/bin/
 
-create_k8s_cluster:
-  stage: create_k8s_cluster
-  script:
-    - kind create cluster --name $CLUSTER_NAME
+  - echo "Installing kubectl"
+  - wget -qO kubectl "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl"
+  - chmod +x kubectl
+  - mv kubectl /usr/local/bin/
+#  - export PATH="$PATH:$(pwd)"
+  - echo $KUBECONFIG
+#  - export KUBECONFIG="$(kind get kubeconfig-path --name $CI_PIPELINE_ID)"
+#  - REAL_IP=$(ip route|awk '/default/ { print $3 }')
+#  - sed -i -e "s/localhost/$REAL_IP/g" ~/.kube/config
 
-install_kubectl:
-  stage: install_kubectl
+setup_and_run_tests:
+  stage: setup_and_run_tests
   script:
-    - curl -LO "https://dl.k8s.io/release/$(KUBECTL_VERSION)/bin/linux/amd64/kubectl"
-    - chmod +x kubectl
-    - mv kubectl /usr/local/bin/
-    - export KUBECONFIG="$(kind get kubeconfig-path --name $CLUSTER_NAME)"
-
-
-run_tests:
-  stage: run_tests
-  script:
+#if cluster will be ready before 300s, it will go further
+    - kind create cluster --name $CLUSTER_NAME --wait 300s
     - echo Meow
     - kubectl get nodes
     - echo Meoww
     - kubectl get nodes --insecure-skip-tls-verify=true
   after_script:
     - kind delete cluster --name $CLUSTER_NAME
+
+save_results:
+  stage: save_results
+  script: echo Meow results
