@@ -12,3 +12,5 @@ kind install manual for different operating systems: https://kind.sigs.k8s.io/do
 
 Creation of cluster:
 kind create cluster --name kind-2 
+
+shell gitlab executor is needed for pipeline to work in the current implementation
