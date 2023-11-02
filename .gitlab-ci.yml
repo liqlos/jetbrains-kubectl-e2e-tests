@@ -15,23 +15,12 @@ variables:
 
 stages:
   - setup_and_run_tests
-  - save_results
-
-before_script:
-  - echo "Installing kind"
-  - wget -qO kind "https://kind.sigs.k8s.io/dl/$KIND_VERSION/kind-linux-amd64"
-  - chmod +x kind
-  - mv kind /usr/local/bin/
-
-  - echo "Installing kubectl"
-  - wget -qO kubectl "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl"
-  - chmod +x kubectl
-  - mv kubectl /usr/local/bin/
+  - publish_report_page
 
 setup_and_run_tests:
   stage: setup_and_run_tests
   script:
-    #if cluster will be ready before 300s, it will go further
+#if cluster will be ready before 300s, it will go further
     - kind create cluster --name $CLUSTER_NAME --config kind-config.yml --wait 300s
     - sed -i -E -e 's/localhost|0\.0\.0\.0/docker/g' "$HOME/.kube/config"
     - kubectl config set-cluster kind-$CLUSTER_NAME --insecure-skip-tls-verify=true
@@ -39,9 +28,17 @@ setup_and_run_tests:
     - kubectl cluster-info
     - kubectl get namespaces
 
+    - echo "Executing tests"
+    - ./gradlew test
   after_script:
     - kind delete cluster --name $CLUSTER_NAME
+  artifacts:
+    when: always
+    paths:
+      - $CI_PROJECT_DIR/build/reports/tests/test/
+      - $CI_PROJECT_DIR/build/test-results/test/
+    expire_in: 3 days
 
-save_results:
-  stage: save_results
+publish_report_page:
+  stage: publish_report_page
   script: echo Meow results

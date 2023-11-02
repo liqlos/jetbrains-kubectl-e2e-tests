@@ -9,6 +9,8 @@ class KubectlTest : FeatureSpec({
     feature("version info") {
         scenario("should allow user to check kubectl version") {
             val result = executeCommand("kubectl version")
+
+
             result.exitCode shouldBe 0
             result.output shouldContain "Client Version"
             //kubectl --kubeconfig ./admin.conf get nodes
