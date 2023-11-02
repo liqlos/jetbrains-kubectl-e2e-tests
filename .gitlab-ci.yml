@@ -1,17 +1,17 @@
-image: docker:24.0.7
+image: docker:24
 
 default:
   tags:
     - docker_executor
-#    - shell_executor
   services:
-   - name: docker:24.0.7-dind
+    - docker:24-dind
 
 variables:
-  #$(wget -qO - https://dl.k8s.io/release/stable.txt)
+  #stable kubectl version: $(wget -qO - https://dl.k8s.io/release/stable.txt)
   KUBECTL_VERSION: "v1.28.3"
   KIND_VERSION: "v0.20.0"
   CLUSTER_NAME: "my-test-cluster"
+#  DOCKER_TLS_CERTDIR: "/certs"
 
 stages:
   - setup_and_run_tests
@@ -27,21 +27,18 @@ before_script:
   - wget -qO kubectl "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl"
   - chmod +x kubectl
   - mv kubectl /usr/local/bin/
-#  - export PATH="$PATH:$(pwd)"
-  - echo $KUBECONFIG
-#  - export KUBECONFIG="$(kind get kubeconfig-path --name $CI_PIPELINE_ID)"
-#  - REAL_IP=$(ip route|awk '/default/ { print $3 }')
-#  - sed -i -e "s/localhost/$REAL_IP/g" ~/.kube/config
 
 setup_and_run_tests:
   stage: setup_and_run_tests
   script:
-#if cluster will be ready before 300s, it will go further
-    - kind create cluster --name $CLUSTER_NAME --wait 300s
-    - echo Meow
+    #if cluster will be ready before 300s, it will go further
+    - kind create cluster --name $CLUSTER_NAME --config kind-config.yml --wait 300s
+    - sed -i -E -e 's/localhost|0\.0\.0\.0/docker/g' "$HOME/.kube/config"
+    - kubectl config set-cluster kind-$CLUSTER_NAME --insecure-skip-tls-verify=true
     - kubectl get nodes
-    - echo Meoww
-    - kubectl get nodes --insecure-skip-tls-verify=true
+    - kubectl cluster-info
+    - kubectl get namespaces
+
   after_script:
     - kind delete cluster --name $CLUSTER_NAME
 
