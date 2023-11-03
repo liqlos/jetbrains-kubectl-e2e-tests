@@ -1,9 +1,11 @@
 package com.bukhalov.kubectl
 
+import mu.KotlinLogging
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 
+val logger = KotlinLogging.logger {}
 fun executeCommand(command: String): CommandResult {
     try {
         val process = ProcessBuilder("/bin/sh", "-c", command).start()

@@ -13,10 +13,11 @@ version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 dependencies {
-   testImplementation(kotlin("stdlib"))
-   testImplementation("io.kotest:kotest-runner-junit5:5.3.2")
-   runtimeOnly("io.github.microutils:kotlin-logging-jvm:3.0.5")
-   testImplementation("ch.qos.logback:logback-classic:'1.4.6'")
+   implementation(kotlin("stdlib"))
+   implementation("io.kotest:kotest-runner-junit5:5.3.2")
+   implementation("ch.qos.logback:logback-classic:1.4.6")
+   implementation("org.slf4j:slf4j-api:2.0.9")
+   implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 }
 
 tasks.withType<Test> {
