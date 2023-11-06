@@ -1,6 +1,5 @@
 package com.bukhalov.kubectl
 
-import com.bukhalov.kubectl.utils.executeCommand
 import io.kotest.core.spec.style.FeatureSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain

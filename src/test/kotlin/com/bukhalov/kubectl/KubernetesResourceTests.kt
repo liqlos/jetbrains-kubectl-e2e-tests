@@ -1,46 +1,63 @@
 package com.bukhalov.kubectl
 
-import com.bukhalov.kubectl.utils.executeCommand
-import com.bukhalov.kubectl.utils.logger
+import io.kotest.assertions.timing.eventually
+import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.framework.concurrency.eventually
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import java.io.File
 
+@ExperimentalKotest
 class KubernetesResourceTests : DescribeSpec({
-    val resourceDir = "src/test/resources/nginx"
 
-    describe("Applying nginx Kubernetes deployment definition") {
-        it("should apply Deployment for nginx") {
-            val deploymentDefinitionFile = File("$resourceDir/nginx-deployment-2-replicas.yaml")
+    beforeEach() {
+        executeCommand("kubectl delete all --all")
+    }
 
-            val applyDeployment = "kubectl apply -f ${deploymentDefinitionFile.absolutePath}"
+    val deploymentDefinitionFile = File("src/test/resources/nginx/nginx-deployment.yaml")
 
-            val applyDeploymentResult = executeCommand(applyDeployment)
+    describe("Applying Kubernetes resources definition") {
+        it("should be able to apply a deployment") {
+            val applyDeploymentCommand = "kubectl apply -f ${deploymentDefinitionFile.absolutePath}"
+
+            val applyDeploymentResult = executeCommand(applyDeploymentCommand)
             applyDeploymentResult.exitCode shouldBe 0
             applyDeploymentResult.output shouldContain "nginx-deployment created"
-
             executeCommand("kubectl get pods").output shouldContain "nginx-deployment"
         }
     }
 
-//    val servicesListColumns = listOf("NAME", "TYPE", "CLUSTER-IP", "EXTERNAL-IP", "PORT(S)", "AGE")
-//    servicesListColumns.all { it in result.output } shouldBe true
-//   describe("Monitoring the status of deployed resources") {
-//      it("should monitor the status of the Pod, Service, and Deployment for nginx") {
-//         // Monitor the status of the deployed resources using kubectl
-//         val getPods = "kubectl get pod -l app=nginx"
-//         val getServices = "kubectl get svc -l app=nginx"
-//         val getDeployments = "kubectl get deployment -l app=nginx"
-//
-//         val podStatus = runCommand(getPods)
-//         val serviceStatus = runCommand(getServices)
-//         val deploymentStatus = runCommand(getDeployments)
-//
-//         // Verify the status of the deployed resources
-//         podStatus shouldBe 0
-//         serviceStatus shouldBe 0
-//         deploymentStatus shouldBe 0
-//      }
-//   }
+    describe("Scaling a deployment") {
+        it("should be able to scale a deployment") {
+            val applyDeploymentCommand = "kubectl apply -o json -f ${deploymentDefinitionFile.absolutePath} "
+            val scaleDeploymentCommand = "kubectl scale deployments/nginx-deployment --replicas=4"
+            val getDeploymentCommand = "kubectl -o json get deployments/nginx-deployment"
+
+            val initialReplicaCount = jsonMapper
+                .readTree(executeCommand(applyDeploymentCommand).output)["spec"]["replicas"].intValue()
+
+            initialReplicaCount shouldBe 2
+            executeCommand(scaleDeploymentCommand).exitCode shouldBe 0
+
+            eventually({
+                duration = 5
+            }) {
+                val scaledReplicaCount = jsonMapper
+                    .readTree(executeCommand(getDeploymentCommand).output)["spec"]["replicas"].intValue()
+                scaledReplicaCount shouldBe 4
+            }
+        }
+    }
+
+    describe("Applying nginx Kubernetes pod definition") {
+        it("should be able to apply service configuration") {
+            val applyDeploymentCommand = "kubectl apply -f ${deploymentDefinitionFile.absolutePath}"
+
+            val applyDeploymentResult = executeCommand(applyDeploymentCommand)
+            applyDeploymentResult.exitCode shouldBe 0
+            applyDeploymentResult.output shouldContain "nginx-deployment created"
+            executeCommand("kubectl get pods").output shouldContain "nginx-deployment"
+        }
+    }
 })
