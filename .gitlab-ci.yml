@@ -38,7 +38,7 @@ setup_and_run_tests:
 
     #if cluster will be ready before 300s, it will go further
     - echo "Creating k8s cluster with kind"
-    - kind create cluster --name $CLUSTER_NAME --config kind-config.yml --wait 300s
+    - kind create cluster --name $CLUSTER_NAME --config src/test/resources/kind-config.yml --wait 300s
     - sed -i -E -e 's/localhost|0\.0\.0\.0/docker/g' "$HOME/.kube/config"
     - kubectl config set-cluster kind-$CLUSTER_NAME --insecure-skip-tls-verify=true
 
