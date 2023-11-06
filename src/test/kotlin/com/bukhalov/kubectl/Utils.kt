@@ -1,9 +1,12 @@
 package com.bukhalov.kubectl
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 
 
 val logger = KotlinLogging.logger {}
+val jsonMapper = jacksonObjectMapper()
+
 fun executeCommand(command: String): CommandResult {
     try {
         val process = Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", command))
