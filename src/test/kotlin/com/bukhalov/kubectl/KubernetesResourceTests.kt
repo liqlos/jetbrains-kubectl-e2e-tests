@@ -1,6 +1,5 @@
 package com.bukhalov.kubectl
 
-import io.kotest.assertions.timing.eventually
 import io.kotest.common.ExperimentalKotest
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.framework.concurrency.eventually

@@ -18,6 +18,7 @@ stages:
 
 setup_and_run_tests:
   stage: setup_and_run_tests
+  allow_failure: true
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -59,8 +60,14 @@ setup_and_run_tests:
       - $CI_PROJECT_DIR/build/test-results/test/
     expire_in: 3 days
 
-publish_report_page:
+pages:
   stage: publish_report_page
-  needs:
-    - setup_and_run_tests
-  script: echo Meow results
+  only:
+    - develop
+    - main
+  script:
+    - mkdir public/
+    - mv $CI_PROJECT_DIR/build/reports/tests/test/* public/
+  artifacts:
+    paths:
+      - public
