@@ -16,12 +16,11 @@ class KubernetesResourceTests : DescribeSpec({
 
             val applyDeployment = "kubectl apply -f ${deploymentDefinitionFile.absolutePath}"
 
-            val result = executeCommand(applyDeployment)
-            result.exitCode shouldBe 0
-            result.output shouldContain "created"
+            val applyDeploymentResult = executeCommand(applyDeployment)
+            applyDeploymentResult.exitCode shouldBe 0
+            applyDeploymentResult.output shouldContain "nginx-deployment created"
 
-            logger.info { "get pods: " + executeCommand("kubectl get pods").output }
-            logger.info { "get deployments: " + executeCommand("kubectl get deployments").output }
+            executeCommand("kubectl get pods").output shouldContain "nginx-deployment"
         }
     }
 

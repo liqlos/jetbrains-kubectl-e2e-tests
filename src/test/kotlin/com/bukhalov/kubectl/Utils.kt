@@ -1,27 +1,29 @@
 package com.bukhalov.kubectl
 
 import mu.KotlinLogging
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 
 val logger = KotlinLogging.logger {}
 fun executeCommand(command: String): CommandResult {
     try {
-        val process = ProcessBuilder("/bin/sh", "-c", command).start()
-        //TODO:
-        //val process = Runtime.getRuntime().exec(command)
-        val reader = BufferedReader(InputStreamReader(process.inputStream))
-        val output = reader.readText()
-        val errorStream = process.errorStream.bufferedReader().readText()
+        val process = Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", command))
+
+        val output = process.inputStream.bufferedReader().readText()
+        val errorOutput = process.errorReader().readText()
         val exitCode = process.waitFor()
 
-        return CommandResult(exitCode, output, errorStream)
+        logger.info {
+            "Executed command: $command\n" +
+                    "Stdout: $output\n" +
+                    "ExitCode: $exitCode\n" +
+                    "Stderr: $errorOutput\n"
+        }
+
+        return CommandResult(exitCode, output, errorOutput)
     } catch (e: Exception) {
-        // Log any exceptions that occur
-        println("An error occurred while executing the command: ${e.message}")
+        logger.error { "An error occurred while executing the command: ${e.message}" }
         return CommandResult(-1, "", e.message ?: "Unknown error")
     }
 }
 
-data class CommandResult(val exitCode: Int, val output: String, val error: String)
+data class CommandResult(val exitCode: Int, val output: String, val errorOutput: String)
