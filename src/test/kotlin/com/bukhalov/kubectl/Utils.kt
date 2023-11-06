@@ -9,6 +9,8 @@ val logger = KotlinLogging.logger {}
 fun executeCommand(command: String): CommandResult {
     try {
         val process = ProcessBuilder("/bin/sh", "-c", command).start()
+        //TODO:
+        //val process = Runtime.getRuntime().exec(command)
         val reader = BufferedReader(InputStreamReader(process.inputStream))
         val output = reader.readText()
         val errorStream = process.errorStream.bufferedReader().readText()
@@ -23,4 +25,3 @@ fun executeCommand(command: String): CommandResult {
 }
 
 data class CommandResult(val exitCode: Int, val output: String, val error: String)
-
