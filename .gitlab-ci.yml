@@ -11,7 +11,6 @@ variables:
   KUBECTL_VERSION: "v1.28.3"
   KIND_VERSION: "v0.20.0"
   CLUSTER_NAME: "my-test-cluster"
-  #DOCKER_TLS_CERTDIR: "/certs"
 
 stages:
   - setup_and_run_tests
@@ -45,16 +44,9 @@ setup_and_run_tests:
     - echo "Installing jre"
     - apk update --quiet && apk add --quiet openjdk17-jre-headless
     - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk/
-    - ls /var/
-    - ls /var/cache/
-    - ls -la ~/
+    - ls -la
 
   script:
-    #just checking that is there
-    - kubectl get nodes
-    - kubectl cluster-info
-    - kubectl get namespaces
-
     - echo "Executing tests"
     - ./gradlew test
 
