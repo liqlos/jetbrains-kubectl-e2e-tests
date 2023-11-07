@@ -24,3 +24,12 @@ or can be viewed by the link: http://jetbrains-kubectl-e2e-tests-root-03b3a09fdb
 Pipeline run time can be optimized by building a custom docker image where kind and jre are preinstalled
 cluster creation should remain in the pipeline because it needs dind service, and kubectl installation should also be 
 a part of the pipeline to be able to parametrize its version from gitlab when running with parameters
+
+
+
+Pipeline can be started from pipelines page of gitlab by clicking on "Run pipeline" button:
+![Run pipeline](src/test/resources/images/runPipeline.png)
+
+Default kubectl version is v1.28.3, but it can be overrided by passing KUBECTL_VERSION variable when running the pipeline:
+![Specifying kubectl version](src/test/resources/images/runPipeline.png)
+

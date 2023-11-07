@@ -31,7 +31,7 @@ setup_and_run_tests:
     - chmod +x kind
     - mv kind /usr/local/bin/
 
-    - echo "Installing kubectl"
+    - echo "Installing kubectl $KUBECTL_VERSION"
     - wget -qO kubectl "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl"
     - chmod +x kubectl
     - mv kubectl /usr/local/bin/
@@ -45,7 +45,6 @@ setup_and_run_tests:
     - echo "Installing jre"
     - apk update --quiet && apk add --quiet openjdk17-jre-headless
     - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk/
-    - ls -la
 
   script:
     - echo "Executing tests"
