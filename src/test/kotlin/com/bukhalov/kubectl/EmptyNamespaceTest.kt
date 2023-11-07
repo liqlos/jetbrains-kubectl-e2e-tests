@@ -33,7 +33,21 @@ class EmptyNamespaceTest : FeatureSpec({
             result.exitCode shouldBe 0
             result.errorOutput shouldContain "No resources found in $emptyNamespace namespace."
         }
+
+        scenario("should allow user to list nodes") {
+            val result = executeCommand("kubectl get nodes -o json")
+            result.exitCode shouldBe 0
+
+            val nodesArray = jsonMapper
+                .readTree(result.output).path("items")
+            nodesArray.size() shouldBe 1
+
+            val nodeName = nodesArray[0].path("metadata").path("name").asText()
+            nodeName shouldContain "control-plane"
+        }
     }
 
-    afterSpec { executeCommand("kubectl delete namespace $emptyNamespace") }
+    afterSpec {
+        executeCommand("kubectl delete namespace $emptyNamespace")
+    }
 })
