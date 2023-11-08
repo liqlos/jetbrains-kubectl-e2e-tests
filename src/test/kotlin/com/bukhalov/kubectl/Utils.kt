@@ -7,9 +7,9 @@ import mu.KotlinLogging
 val logger = KotlinLogging.logger {}
 val jsonMapper = jacksonObjectMapper()
 
-fun executeCommand(command: String): CommandResult {
+fun runKubectlCommand(command: String): CommandResult {
     try {
-        val process = Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", command))
+        val process = Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", "kubectl $command"))
 
         val output = process.inputStream.bufferedReader().readText()
         val errorOutput = process.errorReader().readText()
@@ -27,6 +27,10 @@ fun executeCommand(command: String): CommandResult {
         logger.error { "An error occurred while executing the command: ${e.message}" }
         return CommandResult(-1, "", e.message ?: "Unknown error")
     }
+}
+
+fun cleanCluster(){
+    runKubectlCommand("delete all --all")
 }
 
 data class CommandResult(val exitCode: Int, val output: String, val errorOutput: String)

@@ -24,9 +24,9 @@ setup_and_run_tests:
     paths:
       - ~/.gradle
       - /var/cache/apk/
-    policy: pull
+
   before_script:
-    - echo "Installing kind"
+    - echo "Installing kind $KIND_VERSION"
     - wget -qO kind "https://kind.sigs.k8s.io/dl/$KIND_VERSION/kind-linux-amd64"
     - chmod +x kind
     - mv kind /usr/local/bin/
