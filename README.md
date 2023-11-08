@@ -28,10 +28,6 @@ or can be viewed via this [link](http://jetbrains-kubectl-e2e-tests-root-03b3a09
 ![Specifying kubectl version](readme_images/reportPages.png)
 
 
-Pipeline run time can be optimized by building a custom Docker image where `kind` and JRE are preinstalled.
-Cluster creation should remain in the pipeline because it requires the Docker-in-Docker service (dind), 
-and `kubectl` installation should also be a part of the pipeline to allow parameterizing its version from GitLab when running with parameters.
-
 ## Running Locally
 
 To run tests locally, you need to have the following tools installed:
@@ -47,3 +43,14 @@ You can use the provided scripts to install `kubectl`, `kind`, and spin up a clu
 - For Windows, use [local_install.bat](local_install.bat).
 
 Please note that you still need to install Docker and JRE yourself. You can also install the Kotest plugin for IntelliJ IDEA to work with tests from IDEA conveniently.
+
+
+
+
+Pipeline run time can be optimized further by building a custom Docker image where `kind` and JRE are preinstalled.
+Cluster creation should remain in the pipeline because it requires the Docker-in-Docker service (dind),
+and `kubectl` installation should also be a part of the pipeline to allow parameterizing its version from GitLab when running with parameters.
+
+There are a lot of hardcoded commands in tests some of which are repeatedly used, they could be extracted in a separate file,
+for example object "KubectlCommands" with commands as string values or parametrized methods, but at this point with current quantity
+of tests it seems like it would introduce more unnecessary complexity rather than help to structure code.
