@@ -10,3 +10,7 @@ spec:
       image: nginx:1.20.0
       ports:
         - containerPort: 80
+      command:
+        - "sh"
+        - "-c"
+        - "while true; do echo 'This is my log'; sleep 1; done"
