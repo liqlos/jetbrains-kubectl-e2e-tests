@@ -1,0 +1,72 @@
+image: docker:24
+
+default:
+  tags:
+    - docker_executor
+  services:
+    - docker:24-dind
+
+variables:
+  #stable kubectl version: $(wget -qO - https://dl.k8s.io/release/stable.txt)
+  KUBECTL_VERSION: "v1.28.3"
+  KIND_VERSION: "v0.20.0"
+  CLUSTER_NAME: "my-test-cluster"
+
+stages:
+  - setup_and_run_tests
+  - publish_report_page
+
+setup_and_run_tests:
+  stage: setup_and_run_tests
+  allow_failure: true
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - ~/.gradle
+      - /var/cache/apk/
+
+  before_script:
+    - echo "Installing kind $KIND_VERSION"
+    - wget -qO kind "https://kind.sigs.k8s.io/dl/$KIND_VERSION/kind-linux-amd64"
+    - chmod +x kind
+    - mv kind /usr/local/bin/
+
+    - echo "Installing kubectl $KUBECTL_VERSION"
+    - wget -qO kubectl "https://dl.k8s.io/release/$KUBECTL_VERSION/bin/linux/amd64/kubectl"
+    - chmod +x kubectl
+    - mv kubectl /usr/local/bin/
+
+    #if cluster will be ready before 300s, it will go further
+    - echo "Creating k8s cluster with kind"
+    - kind create cluster --name $CLUSTER_NAME --config src/test/resources/kind-config.yml --wait 300s
+    - sed -i -E -e 's/localhost|0\.0\.0\.0/docker/g' "$HOME/.kube/config"
+    - kubectl config set-cluster kind-$CLUSTER_NAME --insecure-skip-tls-verify=true
+
+    - echo "Installing jre"
+    - apk update --quiet && apk add --quiet openjdk17-jre-headless
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk/
+
+  script:
+    - echo "Executing tests"
+    - ./gradlew test --no-daemon
+
+  after_script:
+    - kind delete cluster --name $CLUSTER_NAME
+  artifacts:
+    when: always
+    paths:
+      - $CI_PROJECT_DIR/build/reports/tests/test/
+      - $CI_PROJECT_DIR/build/test-results/test/
+    expire_in: 3 days
+
+pages:
+  stage: publish_report_page
+  only:
+    - develop
+    - main
+  script:
+    - mkdir public/
+    - mv $CI_PROJECT_DIR/build/reports/tests/test/* public/
+  artifacts:
+    paths:
+      - public

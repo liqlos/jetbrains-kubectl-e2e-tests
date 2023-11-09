@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx:1.20.0
+      ports:
+        - containerPort: 80
+      command:
+        - "sh"
+        - "-c"
+        - "while true; do echo 'This is my log'; sleep 1; done"
