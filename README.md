@@ -54,3 +54,7 @@ and `kubectl` installation should also be a part of the pipeline to allow parame
 There are a lot of hardcoded commands in tests some of which are repeatedly used, they could be extracted in a separate file,
 for example object "KubectlCommands" with commands as string values or parametrized methods, but at this point with current quantity
 of tests it seems like it would introduce more unnecessary complexity rather than help to structure code.
+
+To extract values from kubectl output I tried both special output parameters of kubectl itself and jackson mapper. 
+Jackson mapper maybe better as it does not rely on kubectl implementation. And if purpose of the tests is to check kubectl for manual use,
+it is better to use neither of these and just check standard human-readable output.
